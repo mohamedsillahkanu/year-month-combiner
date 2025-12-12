@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICF-SL Year-Month Combiner - YYYY-MM Format</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            font-family: 'Oswald', Arial, sans-serif;
+            color: #000000;
+            font-weight: 500;
+            padding: 20px;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background-color: #004080;
+            color: #ffffff;
+            padding: 25px 30px;
+            text-align: center;
+            margin-bottom: 15px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .logo-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+
+        .logo-box {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-box img {
+            width: 100px;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        .page-header h3 {
+            margin: 12px 0 5px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        .page-header .tagline {
+            margin: 0;
+            font-size: 10px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .page-header h1 {
+            margin: 20px 0 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .page-header .subtitle {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .content-card {
+            border: 4px double #004080;
+            border-radius: 12px;
+            padding: 12px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .content-inner {
+            padding: 25px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 2px dashed #004080;
+            text-align: center;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #0056b3;
+            background: #e7f3ff;
+        }
+
+        .upload-section h3 {
+            color: #004080;
+            margin-bottom: 1rem;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .upload-section p {
+            color: #000000;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            background: #004080;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 6px;
+            border: 2px solid #004080;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Oswald', Arial, sans-serif;
+            margin-top: 1rem;
+        }
+
+        .file-input-wrapper:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .section-header {
+            background-color: #004080;
+            color: #ffffff;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-icon {
+            background: #ffffff;
+            color: #004080;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .stats-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 2px solid #004080;
+            transition: all 0.2s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 64, 128, 0.2);
+        }
+
+        .stats-card h4 {
+            color: #666;
+            font-size: 11px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .stats-card .metric-value {
+            font-size: 1.6rem;
+            color: #004080;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+
+        .stats-card p {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .stats-card.warning .metric-value {
+            color: #dc3545;
+        }
+
+        .stats-card.success .metric-value {
+            color: #28a745;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: 2px solid #004080;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Oswald', Arial, sans-serif;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #004080;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #004080;
+        }
+
+        .btn-secondary:hover {
+            background: #004080;
+            color: #ffffff;
+        }
+
+        .btn-gold {
+            background: #ffc107;
+            color: #000000;
+            border-color: #ffc107;
+        }
+
+        .btn-gold:hover {
+            background: #e0a800;
+            border-color: #e0a800;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: #ffffff;
+            border-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            border-color: #218838;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #e7f3ff;
+            border: 2px solid #004080;
+            color: #004080;
+        }
+
+        .info-message {
+            background: #e7f3ff;
+            color: #004080;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 2px solid #004080;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: #004080;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #004080;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #ffffff;
+            color: #000000;
+            font-family: 'Oswald', Arial, sans-serif;
+            font-weight: 500;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0056b3;
+            box-shadow: 0 0 0 3px rgba(0, 64, 128, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .config-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid #004080;
+            margin: 1rem 0;
+        }
+
+        .config-card h4 {
+            color: #004080;
+            margin-bottom: 1rem;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .loading-spinner {
+            border: 4px solid #e7f3ff;
+            border-top: 4px solid #004080;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid #004080;
+        }
+
+        .feature-card h4 {
+            color: #004080;
+            margin-bottom: 1rem;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .feature-card ul {
+            color: #000000;
+            line-height: 1.8;
+            padding-left: 1.5rem;
+        }
+
+        .feature-card li {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .feature-card strong {
+            color: #004080;
+        }
+
+        .page-footer {
+            background-color: #004080;
+            color: #ffffff;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.7;
+            font-weight: 500;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .page-footer p {
+            margin: 6px 0 0;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        .formula-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .formula-box strong {
+            color: #856404;
+        }
+
+        .table-container {
+            max-height: 500px;
+            overflow: auto;
+            border: 2px solid #004080;
+            border-radius: 6px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .results-table th {
+            background: #004080;
+            color: #ffffff;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+        }
+
+        .results-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .results-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .results-table tr:hover {
+            background: #e7f3ff;
+        }
+
+        .results-table tr.error-row {
+            background: #f8d7da !important;
+        }
+
+        .results-table tr.error-row td {
+            color: #721c24;
+        }
+
+        .format-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 1rem 0;
+        }
+
+        .format-tag {
+            background: #e7f3ff;
+            color: #004080;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #004080;
+        }
+
+        .preview-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .output-format-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .output-format-box .format-display {
+            font-size: 28px;
+            font-weight: 700;
+            color: #155724;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .output-format-box p {
+            color: #155724;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .arrow-icon {
+            font-size: 24px;
+            color: #004080;
+            margin: 0 10px;
+        }
+
+        .combine-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .combine-box {
+            background: #fff;
+            border: 2px solid #004080;
+            border-radius: 6px;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        .combine-box .label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .combine-box .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #004080;
+            font-family: monospace;
+        }
+
+        .result-box {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        .result-box .value {
+            color: #fff;
+        }
+
+        .result-box .label {
+            color: #d4edda;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #004080;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .content-inner {
+                padding: 15px;
+            }
+            .page-header h1 {
+                font-size: 20px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="page-header">
+            <div class="logo-row">
+                <div class="logo-box">
+                    <img src="https://github.com/mohamedsillahkanu/gdp-dashboard-2/raw/6c7463b0d5c3be150aafae695a4bcbbd8aeb1499/ICF-SL.jpg" alt="ICF-SL Logo">
+                </div>
+            </div>
+            <h3>Informatics Consultancy Firm-Sierra Leone<br>(ICF-SL)</h3>
+            <p class="tagline"><em>Driving Data-Driven Solutions for Health and Development</em></p>
+            <h1>YEAR-MONTH COMBINER</h1>
+            <p class="subtitle">Combine Year and Month Columns into YYYY-MM Date Format</p>
+        </div>
+
+        <div class="content-card">
+            <div class="content-inner">
+
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Upload Section -->
+                <div id="uploadSection">
+                    <div class="upload-section">
+                        <h3>📁 UPLOAD YOUR DATA FILE</h3>
+                        <p>Upload a CSV or Excel file containing Year and Month columns to combine</p>
+                        <label class="file-input-wrapper">
+                            Choose Data File
+                            <input type="file" id="dataFileInput" accept=".csv,.xlsx,.xls">
+                        </label>
+                        <div id="dataFileName" style="margin-top: 10px; color: #28a745; font-weight: 700;"></div>
+                    </div>
+
+                    <div id="uploadProgress" class="hidden">
+                        <div class="loading-spinner"></div>
+                        <p style="text-align: center;">Processing your file...</p>
+                    </div>
+
+                    <!-- Output Format Display -->
+                    <div class="output-format-box">
+                        <p style="margin: 0 0 5px 0; font-weight: 700;">OUTPUT FORMAT</p>
+                        <div class="format-display">YYYY-MM</div>
+                        <p>Example: 2024-01, 2023-12, 2025-06</p>
+                    </div>
+
+                    <!-- Supported Formats -->
+                    <div class="config-card">
+                        <h4>✓ Supported Month Input Formats</h4>
+                        <div class="format-examples">
+                            <span class="format-tag">1, 2, 3 ... 12</span>
+                            <span class="format-tag">01, 02, 03 ... 12</span>
+                            <span class="format-tag">January, February ...</span>
+                            <span class="format-tag">Jan, Feb, Mar ...</span>
+                            <span class="format-tag">JANUARY, JAN</span>
+                        </div>
+                        <p style="color: #666; font-size: 13px; margin-top: 10px;">
+                            <strong>Year formats:</strong> 4-digit years (2021, 2022, 2023, 2024, 2025...)
+                        </p>
+                    </div>
+
+                    <!-- Features Section -->
+                    <div class="section-header">
+                        <span class="section-icon">?</span>
+                        <span class="section-title">HOW IT WORKS</span>
+                    </div>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>Step 1: Upload</h4>
+                            <ul>
+                                <li>Upload CSV or Excel file</li>
+                                <li>File is parsed automatically</li>
+                                <li>All columns are detected</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>Step 2: Select Columns</h4>
+                            <ul>
+                                <li>Choose the Year column</li>
+                                <li>Choose the Month column</li>
+                                <li>Preview combination result</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>Step 3: Process & Export</h4>
+                            <ul>
+                                <li>Creates new Year_Month column</li>
+                                <li>Format: YYYY-MM (e.g., 2024-01)</li>
+                                <li>Download as Excel or CSV</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Section -->
+                <div id="configSection" class="hidden">
+                    <div class="section-header">
+                        <span class="section-icon">⚙</span>
+                        <span class="section-title">SELECT COLUMNS TO COMBINE</span>
+                    </div>
+
+                    <div class="config-card">
+                        <h4>Column Selection</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="yearColumn">Year Column</label>
+                                <select id="yearColumn" class="form-control" onchange="previewCombination()">
+                                    <option value="">-- Select Year Column --</option>
+                                </select>
+                                <small style="color: #666; font-size: 12px;">Column containing year values (e.g., 2024, 2023)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="monthColumn">Month Column</label>
+                                <select id="monthColumn" class="form-control" onchange="previewCombination()">
+                                    <option value="">-- Select Month Column --</option>
+                                </select>
+                                <small style="color: #666; font-size: 12px;">Column containing month values (1-12, Jan-Dec, etc.)</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Combination Preview -->
+                        <div id="combinationPreview" class="hidden">
+                            <h4 style="color: #004080; margin: 1rem 0 0.5rem;">Preview:</h4>
+                            <div class="combine-preview" id="previewContainer">
+                                <!-- Dynamic preview -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h4>Output Options</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newColumnName">New Column Name</label>
+                                <input type="text" id="newColumnName" class="form-control" value="Year_Month" placeholder="Year_Month">
+                            </div>
+                            <div class="form-group">
+                                <label for="columnPosition">Column Position</label>
+                                <select id="columnPosition" class="form-control">
+                                    <option value="after_month">After Month Column</option>
+                                    <option value="after_year">After Year Column</option>
+                                    <option value="first">First Column</option>
+                                    <option value="last">Last Column</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="keepOriginalCols" checked style="margin-right: 8px; accent-color: #004080;">
+                                Keep original Year and Month columns in output
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <button class="btn btn-gold" onclick="processData()">⚡ Create Year_Month Column</button>
+                        <button class="btn btn-secondary" onclick="resetAll()">Start Over</button>
+                    </div>
+                </div>
+
+                <!-- Processing Section -->
+                <div id="processingSection" class="hidden">
+                    <div class="section-header">
+                        <span class="section-icon">⏳</span>
+                        <span class="section-title">PROCESSING</span>
+                    </div>
+                    <div class="config-card" style="text-align: center;">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top: 1rem; font-weight: 700; color: #004080;">Creating Year_Month column...</p>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="hidden">
+                    <div class="section-header">
+                        <span class="section-icon">✓</span>
+                        <span class="section-title">RESULTS</span>
+                    </div>
+
+                    <div class="stats-grid" id="summaryStats">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <!-- Results Table -->
+                    <div class="config-card">
+                        <h4>Processed Data Preview</h4>
+                        <div class="table-container">
+                            <table class="results-table" id="resultsTable">
+                                <!-- Populated dynamically -->
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <button class="btn btn-success" onclick="downloadExcel()">📥 Download Excel</button>
+                        <button class="btn btn-primary" onclick="downloadCSV()">📥 Download CSV</button>
+                        <button class="btn btn-secondary" onclick="backToConfig()">Change Settings</button>
+                        <button class="btn btn-secondary" onclick="resetAll()">Start Over</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="page-footer">
+            <p style="margin: 0; font-weight: 700;">National Malaria Control Programme</p>
+            <p>Ministry of Health and Sanitation, Sierra Leone</p>
+            <p style="font-size: 11px;">Medical Stores Compound, Freetown, Sierra Leone</p>
+            <p style="font-size: 10px;">© 2025 Informatics Consultancy Firm-Sierra Leone (ICF-SL)</p>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let rawData = null;
+        let processedData = null;
+        let availableColumns = [];
+        let fileName = '';
+
+        // Month mapping - text to numeric
+        const monthToNumber = {
+            // Full names
+            'january': '01', 'february': '02', 'march': '03', 'april': '04',
+            'may': '05', 'june': '06', 'july': '07', 'august': '08',
+            'september': '09', 'october': '10', 'november': '11', 'december': '12',
+            // 3-letter abbreviations
+            'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04',
+            'jun': '06', 'jul': '07', 'aug': '08',
+            'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12',
+            // Additional variations
+            'sept': '09'
+        };
+
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('dataFileInput').addEventListener('change', handleFileUpload);
+        });
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = message;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            fileName = file.name;
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+
+            document.getElementById('uploadProgress').classList.remove('hidden');
+
+            if (fileExtension === 'csv') {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        rawData = results.data;
+                        availableColumns = Object.keys(results.data[0] || {});
+                        document.getElementById('dataFileName').textContent = `✓ Loaded: ${fileName} (${results.data.length} rows, ${availableColumns.length} columns)`;
+                        document.getElementById('uploadProgress').classList.add('hidden');
+                        showConfigSection();
+                    },
+                    error: function(error) {
+                        showAlert('Error reading CSV: ' + error.message, 'error');
+                        document.getElementById('uploadProgress').classList.add('hidden');
+                    }
+                });
+            } else if (['xlsx', 'xls'].includes(fileExtension)) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        rawData = XLSX.utils.sheet_to_json(firstSheet);
+                        availableColumns = Object.keys(rawData[0] || {});
+                        document.getElementById('dataFileName').textContent = `✓ Loaded: ${fileName} (${rawData.length} rows, ${availableColumns.length} columns)`;
+                        document.getElementById('uploadProgress').classList.add('hidden');
+                        showConfigSection();
+                    } catch (error) {
+                        showAlert('Error reading Excel: ' + error.message, 'error');
+                        document.getElementById('uploadProgress').classList.add('hidden');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                showAlert('Please upload a CSV or Excel file', 'error');
+                document.getElementById('uploadProgress').classList.add('hidden');
+            }
+        }
+
+        function showConfigSection() {
+            populateColumnSelectors();
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('configSection').classList.remove('hidden');
+            showAlert(`File loaded successfully! Select Year and Month columns to combine.`, 'success');
+        }
+
+        function populateColumnSelectors() {
+            const yearSelect = document.getElementById('yearColumn');
+            const monthSelect = document.getElementById('monthColumn');
+            
+            yearSelect.innerHTML = '<option value="">-- Select Year Column --</option>';
+            monthSelect.innerHTML = '<option value="">-- Select Month Column --</option>';
+            
+            availableColumns.forEach(col => {
+                yearSelect.innerHTML += `<option value="${col}">${col}</option>`;
+                monthSelect.innerHTML += `<option value="${col}">${col}</option>`;
+            });
+
+            // Auto-select if column names match common patterns
+            availableColumns.forEach(col => {
+                const colLower = col.toLowerCase();
+                if (colLower === 'year' || colLower === 'yr') {
+                    yearSelect.value = col;
+                }
+                if (colLower === 'month' || colLower === 'mon' || colLower === 'mth') {
+                    monthSelect.value = col;
+                }
+            });
+
+            previewCombination();
+        }
+
+        function convertMonthToNumber(monthValue) {
+            if (!monthValue && monthValue !== 0) return { value: '', error: 'Empty month' };
+            
+            const monthStr = String(monthValue).trim().toLowerCase();
+            
+            // Check if it's already a number
+            const numericMonth = parseInt(monthStr);
+            if (!isNaN(numericMonth) && numericMonth >= 1 && numericMonth <= 12) {
+                return { value: String(numericMonth).padStart(2, '0'), error: null };
+            }
+            
+            // Try to match text month
+            // First try exact match
+            if (monthToNumber[monthStr]) {
+                return { value: monthToNumber[monthStr], error: null };
+            }
+            
+            // Try to find a match within the text (for cases like "January 2024" where only month part is passed)
+            const sortedKeys = Object.keys(monthToNumber).sort((a, b) => b.length - a.length);
+            for (const key of sortedKeys) {
+                if (monthStr.includes(key)) {
+                    return { value: monthToNumber[key], error: null };
+                }
+            }
+            
+            return { value: '', error: 'Invalid month' };
+        }
+
+        function validateYear(yearValue) {
+            if (!yearValue && yearValue !== 0) return { value: '', error: 'Empty year' };
+            
+            const yearStr = String(yearValue).trim();
+            const numericYear = parseInt(yearStr);
+            
+            // Check for valid 4-digit year
+            if (!isNaN(numericYear) && numericYear >= 1900 && numericYear <= 2100) {
+                return { value: String(numericYear), error: null };
+            }
+            
+            // Try to extract 4-digit year from string
+            const yearMatch = yearStr.match(/\b(19|20)\d{2}\b/);
+            if (yearMatch) {
+                return { value: yearMatch[0], error: null };
+            }
+            
+            return { value: '', error: 'Invalid year' };
+        }
+
+        function createYearMonth(yearValue, monthValue) {
+            const yearResult = validateYear(yearValue);
+            const monthResult = convertMonthToNumber(monthValue);
+            
+            if (yearResult.error) {
+                return { value: '', error: yearResult.error };
+            }
+            if (monthResult.error) {
+                return { value: '', error: monthResult.error };
+            }
+            
+            return { value: `${yearResult.value}-${monthResult.value}`, error: null };
+        }
+
+        function previewCombination() {
+            const yearCol = document.getElementById('yearColumn').value;
+            const monthCol = document.getElementById('monthColumn').value;
+            const previewDiv = document.getElementById('combinationPreview');
+            const container = document.getElementById('previewContainer');
+
+            if (!yearCol || !monthCol) {
+                previewDiv.classList.add('hidden');
+                return;
+            }
+
+            // Get first few non-empty rows for preview
+            const previewRows = rawData.filter(row => row[yearCol] && row[monthCol]).slice(0, 3);
+            
+            if (previewRows.length === 0) {
+                container.innerHTML = '<p style="color: #dc3545;">No valid data found with both Year and Month values</p>';
+                previewDiv.classList.remove('hidden');
+                return;
+            }
+
+            let html = '';
+            previewRows.forEach((row, index) => {
+                const result = createYearMonth(row[yearCol], row[monthCol]);
+                const monthFormatted = convertMonthToNumber(row[monthCol]);
+                
+                html += `
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: ${index < previewRows.length - 1 ? '15px' : '0'}; padding-bottom: ${index < previewRows.length - 1 ? '15px' : '0'}; border-bottom: ${index < previewRows.length - 1 ? '1px dashed #ddd' : 'none'}; width: 100%;">
+                        <div class="combine-box">
+                            <div class="label">Year</div>
+                            <div class="value">${row[yearCol]}</div>
+                        </div>
+                        <span class="arrow-icon">+</span>
+                        <div class="combine-box">
+                            <div class="label">Month</div>
+                            <div class="value">${row[monthCol]} → ${monthFormatted.value || '??'}</div>
+                        </div>
+                        <span class="arrow-icon">=</span>
+                        <div class="combine-box ${result.error ? '' : 'result-box'}">
+                            <div class="label">${result.error ? 'Error' : 'Result'}</div>
+                            <div class="value" style="${result.error ? 'color: #dc3545;' : ''}">${result.error || result.value}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            previewDiv.classList.remove('hidden');
+        }
+
+        function processData() {
+            const yearCol = document.getElementById('yearColumn').value;
+            const monthCol = document.getElementById('monthColumn').value;
+            const newColName = document.getElementById('newColumnName').value || 'Year_Month';
+            const colPosition = document.getElementById('columnPosition').value;
+            const keepOriginal = document.getElementById('keepOriginalCols').checked;
+
+            if (!yearCol || !monthCol) {
+                showAlert('Please select both Year and Month columns', 'error');
+                return;
+            }
+
+            // Show processing
+            document.getElementById('configSection').classList.add('hidden');
+            document.getElementById('processingSection').classList.remove('hidden');
+
+            setTimeout(() => {
+                processedData = [];
+                let successCount = 0;
+                let errorCount = 0;
+
+                rawData.forEach((row, index) => {
+                    const yearValue = row[yearCol];
+                    const monthValue = row[monthCol];
+                    const result = createYearMonth(yearValue, monthValue);
+
+                    // Build new row based on column position
+                    const newRow = {};
+                    
+                    // Determine column order
+                    let outputColumns = [...availableColumns];
+                    
+                    // If not keeping original columns, remove them
+                    if (!keepOriginal) {
+                        outputColumns = outputColumns.filter(col => col !== yearCol && col !== monthCol);
+                    }
+
+                    // Add columns in order
+                    if (colPosition === 'first') {
+                        newRow[newColName] = result.value;
+                    }
+
+                    outputColumns.forEach(col => {
+                        newRow[col] = row[col];
+                        
+                        // Insert after specific column
+                        if (colPosition === 'after_year' && col === yearCol) {
+                            newRow[newColName] = result.value;
+                        }
+                        if (colPosition === 'after_month' && col === monthCol) {
+                            newRow[newColName] = result.value;
+                        }
+                    });
+
+                    if (colPosition === 'last') {
+                        newRow[newColName] = result.value;
+                    }
+
+                    // Add internal tracking
+                    newRow['_error'] = result.error;
+                    newRow['_originalYear'] = yearValue;
+                    newRow['_originalMonth'] = monthValue;
+
+                    if (result.error) {
+                        errorCount++;
+                    } else {
+                        successCount++;
+                    }
+
+                    processedData.push(newRow);
+                });
+
+                // Store column config for results display
+                window.columnConfig = { yearCol, monthCol, newColName, keepOriginal, colPosition };
+                
+                displayResults(successCount, errorCount);
+            }, 500);
+        }
+
+        function displayResults(successCount, errorCount) {
+            document.getElementById('processingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+
+            const totalRows = processedData.length;
+            const successRate = totalRows > 0 ? ((successCount / totalRows) * 100).toFixed(1) : 0;
+
+            // Get unique year-month values
+            const uniqueYearMonths = [...new Set(processedData.map(row => {
+                const colName = window.columnConfig.newColName;
+                return row[colName];
+            }).filter(v => v))];
+
+            // Display summary stats
+            document.getElementById('summaryStats').innerHTML = `
+                <div class="stats-card">
+                    <h4>Total Rows</h4>
+                    <div class="metric-value">${totalRows.toLocaleString()}</div>
+                    <p>Records processed</p>
+                </div>
+                <div class="stats-card success">
+                    <h4>Successful</h4>
+                    <div class="metric-value">${successCount.toLocaleString()}</div>
+                    <p>Combined correctly</p>
+                </div>
+                <div class="stats-card ${errorCount > 0 ? 'warning' : 'success'}">
+                    <h4>Errors</h4>
+                    <div class="metric-value">${errorCount.toLocaleString()}</div>
+                    <p>Could not combine</p>
+                </div>
+                <div class="stats-card">
+                    <h4>Unique Periods</h4>
+                    <div class="metric-value">${uniqueYearMonths.length}</div>
+                    <p>YYYY-MM values</p>
+                </div>
+            `;
+
+            // Generate preview table
+            generatePreviewTable();
+
+            showAlert(`Processing complete! ${successCount} rows combined successfully, ${errorCount} errors.`, 
+                errorCount > 0 ? 'info' : 'success');
+        }
+
+        function generatePreviewTable() {
+            const table = document.getElementById('resultsTable');
+            const config = window.columnConfig;
+            
+            // Get display columns (exclude internal columns)
+            const displayCols = Object.keys(processedData[0] || {}).filter(col => !col.startsWith('_'));
+            
+            let html = '<thead><tr><th>#</th>';
+            displayCols.forEach(col => {
+                // Highlight new column
+                const isNew = col === config.newColName;
+                html += `<th style="${isNew ? 'background: #28a745;' : ''}">${col}</th>`;
+            });
+            html += '<th>Status</th></tr></thead><tbody>';
+
+            // Show first 100 rows
+            const previewRows = processedData.slice(0, 100);
+            previewRows.forEach((row, index) => {
+                const hasError = row._error;
+                html += `<tr class="${hasError ? 'error-row' : ''}">`;
+                html += `<td>${index + 1}</td>`;
+                
+                displayCols.forEach(col => {
+                    const isNew = col === config.newColName;
+                    const style = isNew ? 'font-weight: 700; color: #004080; background: #e7f3ff;' : '';
+                    html += `<td style="${style}">${row[col] !== undefined && row[col] !== null ? row[col] : ''}</td>`;
+                });
+                
+                html += `<td><span class="preview-badge ${hasError ? 'badge-error' : 'badge-success'}">${hasError || '✓ OK'}</span></td>`;
+                html += '</tr>';
+            });
+
+            if (processedData.length > 100) {
+                html += `<tr><td colspan="${displayCols.length + 2}" style="text-align: center; color: #666; font-style: italic;">
+                    ... and ${processedData.length - 100} more rows (download to see all)
+                </td></tr>`;
+            }
+
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        function downloadExcel() {
+            // Prepare export data (exclude internal columns)
+            const exportData = processedData.map(row => {
+                const newRow = {};
+                Object.keys(row).forEach(key => {
+                    if (!key.startsWith('_')) {
+                        newRow[key] = row[key];
+                    }
+                });
+                return newRow;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Year_Month Data');
+            
+            const outputName = fileName.replace(/\.[^/.]+$/, '') + '_year_month.xlsx';
+            XLSX.writeFile(wb, outputName);
+            
+            showAlert('Excel file downloaded!', 'success');
+        }
+
+        function downloadCSV() {
+            // Prepare export data (exclude internal columns)
+            const exportData = processedData.map(row => {
+                const newRow = {};
+                Object.keys(row).forEach(key => {
+                    if (!key.startsWith('_')) {
+                        newRow[key] = row[key];
+                    }
+                });
+                return newRow;
+            });
+
+            const csv = Papa.unparse(exportData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            const outputName = fileName.replace(/\.[^/.]+$/, '') + '_year_month.csv';
+            link.download = outputName;
+            link.click();
+            
+            showAlert('CSV file downloaded!', 'success');
+        }
+
+        function backToConfig() {
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('configSection').classList.remove('hidden');
+        }
+
+        function resetAll() {
+            rawData = null;
+            processedData = null;
+            availableColumns = [];
+            fileName = '';
+            window.columnConfig = null;
+
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('configSection').classList.add('hidden');
+            document.getElementById('processingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            document.getElementById('dataFileInput').value = '';
+            document.getElementById('dataFileName').textContent = '';
+            document.getElementById('combinationPreview').classList.add('hidden');
+            document.getElementById('alertContainer').innerHTML = '';
+            
+            // Reset form fields
+            document.getElementById('yearColumn').innerHTML = '<option value="">-- Select Year Column --</option>';
+            document.getElementById('monthColumn').innerHTML = '<option value="">-- Select Month Column --</option>';
+            document.getElementById('newColumnName').value = 'Year_Month';
+            document.getElementById('columnPosition').value = 'after_month';
+            document.getElementById('keepOriginalCols').checked = true;
+        }
+    </script>
+</body>
+</html>
